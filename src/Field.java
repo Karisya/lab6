@@ -9,13 +9,12 @@ import java.util.List;
 public class Field extends JPanel {
     // Флаг приостановленности движения
     private boolean paused;
-
+    private boolean pausedBig;
     // Динамический список скачущих мячей
     private final ArrayList<BouncingBall> balls = new ArrayList<>(10);
 
     // Метод для получения списка шаров
-    public synchronized List<BouncingBall> getBalls() {
-        return balls;}
+
 
     public Field() {
 // Установить цвет заднего фона белым
@@ -44,33 +43,40 @@ public class Field extends JPanel {
     public synchronized void addBall() {
 //Заключается в добавлении в список нового экземпляра BouncingBall // Всю инициализацию положения, скорости, размера, цвета
 // BouncingBall выполняет сам в конструкторе
-        if (balls.size() != 8) {
         balls.add(new BouncingBall(this));}
 //Thread.getAllStackTraces().keySet().forEach(t -> System.out.println(t.getName()));
 
-    }
 
     // Метод синхронизированный, т.е. только один поток может // одновременно быть внутри
     public synchronized void pause() {
         paused = true;
     }
-
+    public synchronized void pauseBig() {
+        // Включить режим паузы
+        pausedBig = true;
+    }
 
 // Включить режим паузы
 
     // Метод синхронизированный, т.е. только один поток может // одновременно быть внутри
     public synchronized void resume() {
-// Выключить режим паузы
+    // Выключить режим паузы
         paused = false;
-// Будим все ожидающие продолжения потоки
-        notifyAll();}
+        pausedBig = false;
+    // Будим все ожидающие продолжения потоки
+        notifyAll();
+
+    }
     // Синхронизированный метод проверки, может ли мяч двигаться // (не включен ли режим паузы?)
-    public synchronized void canMove() throws InterruptedException {
+    public synchronized void canMove(BouncingBall ball) throws InterruptedException {
         // Проверяем, находится ли игра в режиме паузы
         if (paused) {
             wait();
         }
-
+        if (pausedBig && ball.getRadius() >= 30)
+        {
+            wait();
+        }
     }
 }
 

@@ -56,15 +56,8 @@ public class BouncingBall implements Runnable {
     public void run() {
         try {
             while(true) {
-                field.canMove();
-                synchronized (field) {
-                    List<BouncingBall> ballsCopy = new ArrayList<>(field.getBalls());
-                    for (BouncingBall ball : ballsCopy) {
-                        if (this != ball && checkCollision(this, ball)) {
-                            resolveCollision(this, ball);
-                        }
-                    }
-                }
+                field.canMove(this);
+
                 // Обработка столкновения с краями поля
                 if (x + speedX <= radius) {
                     speedX = -speedX;
@@ -90,62 +83,16 @@ public class BouncingBall implements Runnable {
     }
 
 
-
-    // Метод для проверки столкновения двух шаров
-    private boolean checkCollision(BouncingBall ball1, BouncingBall ball2) {
-        double dx = ball1.x - ball2.x;
-        double dy = ball1.y - ball2.y;
-        double distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < ball1.radius + ball2.radius;
-    }
-
-    // Метод для реагирования на столкновение двух шаров
-    private void resolveCollision(BouncingBall ball1, BouncingBall ball2) {
-        double dx = ball1.x - ball2.x;
-        double dy = ball1.y - ball2.y;
-        double distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Нормализация вектора столкновения
-        double nx = dx / distance;
-        double ny = dy / distance;
-
-        // Расчет относительной скорости
-        double dvx = ball1.speedX - ball2.speedX;
-        double dvy = ball1.speedY - ball2.speedY;
-
-        // Проверка, движутся ли шары навстречу друг другу
-        if (dvx * nx + dvy * ny >= 0) return;
-
-        // Расчет скорости после столкновения
-        double impulse = 30 * (dvx * nx + dvy * ny) / (ball1.radius + ball2.radius);
-
-        ball1.speedX -= impulse * nx;
-        ball1.speedY -= impulse * ny;
-        ball2.speedX += impulse * nx;
-        ball2.speedY += impulse * ny;
-
-        // Коррекция позиции, чтобы предотвратить "залипание" шаров
-        double overlap = (ball1.radius + ball2.radius - distance) / 2;
-        ball1.x += overlap * nx;
-        ball1.y += overlap * ny;
-        ball2.x -= overlap * nx;
-        ball2.y -= overlap * ny;
-
-//        // Добавление небольшого отталкивания после столкновения
-       double repulsion = 4; // Коэффициент отталкивания, можно настроить
-        ball1.x += repulsion * nx;
-        ball1.y += repulsion * ny;
-        ball2.x -= repulsion * nx;
-        ball2.y -= repulsion * ny;
-    }
-
-
-
     public void paint(Graphics2D canvas) {
         canvas.setColor(color);
         canvas.setPaint(color);
         Ellipse2D.Double ball = new Ellipse2D.Double(x-radius, y-radius,2*radius, 2*radius);
         canvas.draw(ball);
         canvas.fill(ball);
+    }
+
+
+    public int getRadius() {
+        return radius;
     }
 }

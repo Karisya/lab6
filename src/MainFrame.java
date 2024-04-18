@@ -11,8 +11,9 @@ import javax.swing.JMenuItem;
 public class MainFrame extends JFrame {
     private static final int WIDTH = 700;
     private static final int HEIGHT = 500;
-    private final JMenuItem pauseMenuItem;
+    private JMenuItem pauseMenuItem;
     private final JMenuItem resumeMenuItem;
+
     // Поле, по которому прыгают мячи
     private final Field field = new Field();
 
@@ -64,7 +65,15 @@ public class MainFrame extends JFrame {
         };
         resumeMenuItem = controlMenu.add(resumeAction);
         resumeMenuItem.setEnabled(false);
-
+        pauseMenuItem.setEnabled(true);
+        Action pauseBigAction = new AbstractAction("Приостановить движение big"){
+            public void actionPerformed(ActionEvent event) {
+                field.pauseBig();
+                pauseMenuItem.setEnabled(false);
+                resumeMenuItem.setEnabled(true);
+            }
+        };
+        pauseMenuItem = controlMenu.add(pauseBigAction);
         // Добавить в центр граничной компоновки поле
         getContentPane().add(field, BorderLayout.CENTER);
     }
